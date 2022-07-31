@@ -20,7 +20,6 @@
     "svg-to-vue-component"
   ],
   "files": [
-    "bin",
     "lib"
   ],
   "exports": {
@@ -32,9 +31,11 @@
   },
   "dependencies": {
     "@vue/compiler-sfc": "^3.2.37",
+    "fs-extra": "^10.1.0",
     "jsdom": "^20.0.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.6.3",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",

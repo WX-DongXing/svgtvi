@@ -2,3 +2,7 @@
 node_modules
 *.log
 .idea
+
+# ignore test folders
+svgs
+dist
