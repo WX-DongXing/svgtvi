@@ -30,6 +30,7 @@
     }
   },
   "dependencies": {
+    "@types/jsdom": "^20.0.0",
     "@vue/compiler-sfc": "^3.2.37",
     "fs-extra": "^10.1.0",
     "jsdom": "^20.0.0"

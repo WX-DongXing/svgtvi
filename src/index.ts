@@ -1,12 +1,11 @@
-import { readdir } from 'fs/promises'
 import { join, resolve } from 'node:path'
 import { remove, mkdirs } from 'fs-extra'
-import { readFolder } from './utils'
+import { readFolder, generateTemplate, compiler } from './utils'
 import { SVGTVCConfig } from './types'
 
 export default async function svgtvc(options?: SVGTVCConfig) {
   try {
-    const { input, output = 'dist', clear = true } = options ?? {}
+    const { input, output = 'dist', clear = true, template } = options ?? {}
 
     const outputPath = join(resolve(), output)
 
@@ -15,13 +14,16 @@ export default async function svgtvc(options?: SVGTVCConfig) {
       return
     }
 
-    if (options?.clear) await remove(outputPath)
+    if (clear) await remove(outputPath)
 
     await mkdirs(outputPath)
 
     const files = await readFolder(join(resolve(), input))
 
-    console.log(files)
+    for await (const file of [files[0]]) {
+      const code = await generateTemplate(file, template)
+      const content = compiler({ ...file, code })
+    }
   } catch (error) {
     console.error('svgtvc: an error occurred! ', error)
   }
