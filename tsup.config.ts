@@ -1,11 +1,11 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/cli.ts'],
   outDir: 'lib',
   format: ['cjs', 'esm'],
-  splitting: false,
+  splitting: true,
   sourcemap: false,
   clean: true,
   dts: true
-});
+})

@@ -12,7 +12,7 @@ import { SVGTVCConfig } from './types'
 
 export default async function svgtvc(options?: SVGTVCConfig) {
   try {
-    const { input, output = 'dist', clear = false, template } = options ?? {}
+    const { input, output = 'dist', clean = false, template } = options ?? {}
 
     const outputPath = join(resolve(), output)
 
@@ -21,7 +21,7 @@ export default async function svgtvc(options?: SVGTVCConfig) {
       return
     }
 
-    if (clear) await remove(outputPath)
+    if (clean) await remove(outputPath)
 
     await mkdirs(join(outputPath, 'esm'))
 
@@ -40,7 +40,3 @@ export default async function svgtvc(options?: SVGTVCConfig) {
     console.error('svgtvc: an error occurred! ', error)
   }
 }
-
-svgtvc({
-  input: 'svgs'
-})

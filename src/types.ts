@@ -3,7 +3,7 @@ export type TemplateParser = (fragment: SVGTVCFragement) => string
 export interface SVGTVCConfig {
   input: string
   output?: string
-  clear?: boolean
+  clean?: boolean
   template?: TemplateParser
   svgoConfig?: any
 }
