@@ -12,7 +12,14 @@ import { SVGTVCConfig } from './types'
 
 export default async function svgtvc(options?: SVGTVCConfig) {
   try {
-    const { input, output = 'dist', clean = false, template } = options ?? {}
+    const {
+      input,
+      output = 'dist',
+      clean = false,
+      prefix = '',
+      suffix = '',
+      template
+    } = options ?? {}
 
     const outputPath = join(resolve(), output)
 
@@ -31,8 +38,20 @@ export default async function svgtvc(options?: SVGTVCConfig) {
       const tpl = await generateTemplate(file, template)
       const esmCode = compiler({ ...file, tpl })
       const cjsCode = await transformToCjs(esmCode)
-      await generateFile(outputPath, cjsCode, file.componentName)
-      await generateFile(join(outputPath, 'esm'), esmCode, file.componentName)
+      await generateFile(
+        outputPath,
+        cjsCode,
+        file.componentName,
+        prefix,
+        suffix
+      )
+      await generateFile(
+        join(outputPath, 'esm'),
+        esmCode,
+        file.componentName,
+        prefix,
+        suffix
+      )
     }
 
     await generateExportFile(outputPath, files)

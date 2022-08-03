@@ -7,6 +7,8 @@ import svgtvc from './'
 type ArgvResult = Arguments<{
   input: string
   output: string
+  prefix?: string
+  suffix?: string
 }>
 
 const argv = yargs
@@ -16,6 +18,10 @@ const argv = yargs
   .describe('i', 'Input directory relative to the root directory')
   .alias('o', 'output')
   .describe('o', 'Output directory')
+  .alias('p', 'prefix')
+  .describe('p', 'Icon name prefix')
+  .alias('s', 'suffix')
+  .describe('s', 'Icon name suffix')
   .alias('v', 'version')
   .describe('v', 'Show version number')
   .help('h')
@@ -30,7 +36,9 @@ if (!pathExistsSync(argv.input)) {
 svgtvc({
   input: argv.input,
   output: argv.output ?? 'dist',
-  clean: true
+  clean: true,
+  prefix: argv.prefix,
+  suffix: argv.suffix
 })
   .then(() => {
     console.log('svgtcv: build successful!')

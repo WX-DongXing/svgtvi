@@ -5,6 +5,8 @@ export interface SVGTVCConfig {
   output?: string
   clean?: boolean
   template?: TemplateParser
+  prefix?: string
+  suffix?: string
   svgoConfig?: any
 }
 

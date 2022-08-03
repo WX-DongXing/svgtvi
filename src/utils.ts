@@ -108,23 +108,29 @@ export async function generateFile(
   outputPath: string,
   code: string,
   componentName: string,
+  prefix?: string,
+  suffix?: string,
   customPropsType?: string
 ) {
+  const name = prefix + componentName + suffix
   const type = `import { FunctionalComponent, HTMLAttributes, VNodeProps } from "vue"
-declare const ${componentName}: FunctionalComponent<HTMLAttributes & VNodeProps>
-export default ${componentName}`
-  await writeFile(join(outputPath, `${componentName}.js`), code)
-  await writeFile(join(outputPath, `${componentName}.d.ts`), type)
+declare const ${name}: FunctionalComponent<HTMLAttributes & VNodeProps>
+export default ${name}`
+  await writeFile(join(outputPath, `${name}.js`), code)
+  await writeFile(join(outputPath, `${name}.d.ts`), type)
 }
 
 export async function generateExportFile(
   outputPath: string,
-  svgFiles: SVGFile[]
+  svgFiles: SVGFile[],
+  prefix?: string,
+  suffix?: string
 ) {
   const { cjs, esm } = svgFiles.reduce(
     (acc, { componentName }: SVGFile) => {
-      acc.cjs += `module.exports.${componentName} = require('./${componentName}.js')\n`
-      acc.esm += `export { default as ${componentName} } from './${componentName}'\n`
+      const name = prefix + componentName + suffix
+      acc.cjs += `module.exports.${name} = require('./${name}.js')\n`
+      acc.esm += `export { default as ${name} } from './${name}'\n`
       return acc
     },
     { cjs: '', esm: '', type: '' }
