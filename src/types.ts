@@ -10,9 +10,10 @@ export interface SVGTVCConfig {
 
 export interface SVGFile {
   name: string
+  componentName: string
   path: string
   raw?: string
-  code?: string
+  tpl?: string
 }
 
 export interface SVGTVCFragement extends DocumentFragment {

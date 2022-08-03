@@ -1,6 +1,9 @@
-import { readdir, readFile } from 'fs/promises'
-import { join } from 'node:path'
 import { JSDOM } from 'jsdom'
+import { join } from 'node:path'
+import { transformAsync } from '@babel/core'
+import { readdir, readFile, writeFile } from 'fs/promises'
+import { pascalCase } from 'change-case'
+import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
 import { TemplateParser, SVGFile, SVGTVCFragement } from './types'
 
@@ -17,11 +20,10 @@ export const createSVGTVCFragment = (
 
 export const defaultTemplate: TemplateParser = (fragment: SVGTVCFragement) => {
   return `<script setup>
-  const a = ''
-</script>
-<template>
-  ${fragment.serialize()}
-</template>
+  </script>
+  <template>
+    ${fragment.serialize()}
+  </template>
   `
 }
 
@@ -35,10 +37,14 @@ export async function readFolder(path: string): Promise<SVGFile[]> {
     const fileNames = await readdir(path)
     return fileNames
       .filter((fileName: string) => /.svg$/.test(fileName))
-      .map((fileName: string) => ({
-        name: fileName,
-        path: join(path, fileName)
-      }))
+      .map((fileName: string) => {
+        const name = fileName.replace(/(.+).svg/, '$1')
+        return {
+          name,
+          componentName: pascalCase(name),
+          path: join(path, fileName)
+        }
+      })
   } catch (error) {
     console.error('svgtvc: read folder error! ', error)
     throw error
@@ -68,11 +74,11 @@ export async function generateTemplate(
 }
 
 export function compiler(svgFile: SVGFile): string {
-  if (!svgFile.code) return ''
+  if (!svgFile.tpl) return ''
   let code = ''
-  const sfc = /<script>/.test(svgFile.code)
-  if (sfc) {
-    const { descriptor } = parse(svgFile.code)
+  const { descriptor } = parse(svgFile.tpl)
+
+  if (descriptor.scriptSetup) {
     const result = compileScript(descriptor, {
       inlineTemplate: true,
       id: svgFile.name,
@@ -81,12 +87,50 @@ export function compiler(svgFile: SVGFile): string {
     code = result.content
   } else {
     const result = compileTemplate({
-      source: svgFile.code,
+      source: svgFile.tpl,
       filename: svgFile.name,
       id: svgFile.name,
       isProd: true
     })
-    code = result.code
+    code = result.code += '\nexport default { render }'
   }
   return code
+}
+
+export async function transformToCjs(code: string): Promise<string> {
+  const result = await transformAsync(code, {
+    plugins: [TransformModulesCommonJSPlugin]
+  })
+  return result?.code ?? ''
+}
+
+export async function generateFile(
+  outputPath: string,
+  code: string,
+  componentName: string,
+  customPropsType?: string
+) {
+  const type = `import { FunctionalComponent, HTMLAttributes, VNodeProps } from "vue"
+declare const ${componentName}: FunctionalComponent<HTMLAttributes & VNodeProps>
+export default ${componentName}`
+  await writeFile(join(outputPath, `${componentName}.js`), code)
+  await writeFile(join(outputPath, `${componentName}.d.ts`), type)
+}
+
+export async function generateExportFile(
+  outputPath: string,
+  svgFiles: SVGFile[]
+) {
+  const { cjs, esm } = svgFiles.reduce(
+    (acc, { componentName }: SVGFile) => {
+      acc.cjs += `module.exports.${componentName} = require('./${componentName}.js')\n`
+      acc.esm += `export { default as ${componentName} } from './${componentName}'\n`
+      return acc
+    },
+    { cjs: '', esm: '', type: '' }
+  )
+  await writeFile(join(outputPath, 'index.js'), cjs)
+  await writeFile(join(outputPath, 'index.d.ts'), esm)
+  await writeFile(join(outputPath, 'esm/index.js'), esm)
+  await writeFile(join(outputPath, 'esm/index.d.ts'), esm)
 }
