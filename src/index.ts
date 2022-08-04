@@ -7,7 +7,7 @@ import {
   transformToCjs,
   generateFile,
   generateExportFile
-} from './utils'
+} from './core'
 import { SVGTVCConfig } from './types'
 
 export default async function svgtvc(options?: SVGTVCConfig) {

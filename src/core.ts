@@ -7,6 +7,11 @@ import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-comm
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
 import { TemplateParser, SVGFile, SVGTVCFragement } from './types'
 
+/**
+ * serialize fragment
+ * @param fragment
+ * @returns
+ */
 export const createSVGTVCFragment = (
   fragment: DocumentFragment
 ): SVGTVCFragement => {
@@ -18,6 +23,11 @@ export const createSVGTVCFragment = (
   return Object.assign(fragment, { serialize })
 }
 
+/**
+ * default sfc template
+ * @param fragment
+ * @returns
+ */
 export const defaultTemplate: TemplateParser = (fragment: SVGTVCFragement) => {
   return `<script setup>
   </script>
@@ -51,6 +61,12 @@ export async function readFolder(path: string): Promise<SVGFile[]> {
   }
 }
 
+/**
+ * generate scf template
+ * @param svgFile
+ * @param template
+ * @returns
+ */
 export async function generateTemplate(
   svgFile: SVGFile,
   template?: TemplateParser
@@ -73,6 +89,11 @@ export async function generateTemplate(
   }
 }
 
+/**
+ * compiler raw template to code
+ * @param svgFile
+ * @returns
+ */
 export function compiler(svgFile: SVGFile): string {
   if (!svgFile.tpl) return ''
   let code = ''
@@ -97,6 +118,11 @@ export function compiler(svgFile: SVGFile): string {
   return code
 }
 
+/**
+ * transform esm to cjs
+ * @param code
+ * @returns
+ */
 export async function transformToCjs(code: string): Promise<string> {
   const result = await transformAsync(code, {
     plugins: [TransformModulesCommonJSPlugin]
@@ -104,6 +130,15 @@ export async function transformToCjs(code: string): Promise<string> {
   return result?.code ?? ''
 }
 
+/**
+ * generate type and code file
+ * @param outputPath
+ * @param code
+ * @param componentName
+ * @param prefix
+ * @param suffix
+ * @param customPropsType
+ */
 export async function generateFile(
   outputPath: string,
   code: string,
@@ -120,6 +155,13 @@ export default ${name}`
   await writeFile(join(outputPath, `${name}.d.ts`), type)
 }
 
+/**
+ * generate export file
+ * @param outputPath
+ * @param svgFiles
+ * @param prefix
+ * @param suffix
+ */
 export async function generateExportFile(
   outputPath: string,
   svgFiles: SVGFile[],
