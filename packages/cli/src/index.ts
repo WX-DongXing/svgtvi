@@ -2,7 +2,7 @@
 import { exit } from 'node:process'
 import { pathExistsSync } from 'fs-extra'
 import yargs, { Arguments } from 'yargs'
-import svgtvc from './'
+import svgtvc from '@svgtvc/core'
 
 type ArgvResult = Arguments<{
   input: string

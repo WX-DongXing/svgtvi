@@ -1,0 +1,35 @@
+{
+  "name": "@svgtvc/cli",
+  "version": "0.1.0",
+  "author": "dong.xing@outlook.com",
+  "description": "svgtvc cli",
+  "homepage": "https://github.com/WX-DongXing/svgtvc",
+  "repository": "https://github.com/WX-DongXing/svgtvc",
+  "license": "MIT",
+  "bin": {
+    "svgtvc": "lib/index.js"
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "keywords": [
+    "cli",
+    "svg",
+    "vue",
+    "vue3",
+    "svg-to-vue",
+    "svg-to-vue-component"
+  ],
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "fs-extra": "^10.1.0",
+    "yargs": "^17.5.1",
+    "@svgtvc/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/yargs": "^17.0.10"
+  }
+}
