@@ -55,7 +55,7 @@ export default async function svgtvc(options?: SVGTVCConfig) {
       )
     }
 
-    await generateExportFile(outputPath, files)
+    await generateExportFile(outputPath, files, prefix, suffix)
   } catch (error) {
     console.error('svgtvc: an error occurred! ', error)
   }

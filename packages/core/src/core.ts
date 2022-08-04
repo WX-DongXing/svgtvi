@@ -139,7 +139,10 @@ export function compiler(svgFile: SVGFile): string {
     code = result.content
   } else {
     const result = compileTemplate({
-      source: svgFile.tpl,
+      source:
+        descriptor?.template?.type === 'template'
+          ? descriptor?.template?.content
+          : svgFile.tpl,
       filename: svgFile.name,
       id: svgFile.name,
       isProd: true
