@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { transformAsync } from '@babel/core'
 import { readdir, readFile, writeFile } from 'fs/promises'
 import { pascalCase } from 'change-case'
+import { optimize, OptimizedSvg, OptimizeOptions } from 'svgo'
 import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
 import { TemplateParser, SVGFile, SVGTVCFragement } from './types'
@@ -62,19 +63,49 @@ export async function readFolder(path: string): Promise<SVGFile[]> {
 }
 
 /**
+ * optimize svg by svgo
+ * @param raw
+ * @param svgoConfig
+ * @returns
+ */
+export function optimizeSvg(raw: string, svgoConfig?: OptimizeOptions): string {
+  const config = svgoConfig ?? {
+    plugins: [
+      'preset-default',
+      {
+        name: 'addAttributesToSVGElement',
+        params: {
+          attributes: [
+            { width: '1em' },
+            { height: '1em' },
+            { fill: 'currentColor' }
+          ]
+        }
+      }
+    ]
+  }
+  const { error, ...optimized } = optimize(raw, config)
+  if (error) console.error('svgtvc: optimize svg error ', error)
+  return error ? raw : (optimized as OptimizedSvg).data
+}
+
+/**
  * generate scf template
  * @param svgFile
  * @param template
+ * @param svgoConfig
  * @returns
  */
 export async function generateTemplate(
   svgFile: SVGFile,
-  template?: TemplateParser
+  template?: TemplateParser,
+  svgoConfig?: OptimizeOptions
 ): Promise<string> {
   try {
     const raw = await readFile(svgFile.path, { encoding: 'utf-8' })
+    const optimizedRaw = optimizeSvg(raw, svgoConfig)
     const templateParser = template ?? defaultTemplate
-    const fragment = JSDOM.fragment(raw)
+    const fragment = JSDOM.fragment(optimizedRaw)
 
     if (!fragment.firstChild) {
       throw new TypeError('svgtvc: Parse file error!')

@@ -18,7 +18,8 @@ export default async function svgtvc(options?: SVGTVCConfig) {
       clean = false,
       prefix = '',
       suffix = '',
-      template
+      template,
+      svgoConfig
     } = options ?? {}
 
     const outputPath = join(resolve(), output)
@@ -35,7 +36,7 @@ export default async function svgtvc(options?: SVGTVCConfig) {
     const files = await readFolder(join(resolve(), input))
 
     for await (const file of files) {
-      const tpl = await generateTemplate(file, template)
+      const tpl = await generateTemplate(file, template, svgoConfig)
       const esmCode = compiler({ ...file, tpl })
       const cjsCode = await transformToCjs(esmCode)
       await generateFile(

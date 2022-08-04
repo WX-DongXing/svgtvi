@@ -1,3 +1,5 @@
+import type { OptimizeOptions } from 'svgo'
+
 export type TemplateParser = (fragment: SVGTVCFragement) => string
 
 export interface SVGTVCConfig {
@@ -7,7 +9,7 @@ export interface SVGTVCConfig {
   template?: TemplateParser
   prefix?: string
   suffix?: string
-  svgoConfig?: any
+  svgoConfig?: OptimizeOptions
 }
 
 export interface SVGFile {
