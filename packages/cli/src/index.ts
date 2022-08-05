@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node
 import { exit } from 'node:process'
 import { pathExistsSync } from 'fs-extra'
 import yargs, { Arguments } from 'yargs'
