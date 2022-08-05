@@ -34,13 +34,13 @@ importers:
 
   packages/cli:
     specifiers:
-      '@svgtvc/core': workspace:*
+      '@svgtvi/core': workspace:*
       '@types/fs-extra': ^9.0.13
       '@types/yargs': ^17.0.10
       fs-extra: ^10.1.0
       yargs: ^17.5.1
     dependencies:
-      '@svgtvc/core': link:../core
+      '@svgtvi/core': link:../core
       fs-extra: 10.1.0
       yargs: 17.5.1
     devDependencies:

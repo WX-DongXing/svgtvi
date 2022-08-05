@@ -8,9 +8,9 @@ import {
   generateFile,
   generateExportFile
 } from './core'
-import { SVGTVCConfig } from './types'
+import { SVGTVIConfig } from './types'
 
-export default async function svgtvc(options?: SVGTVCConfig) {
+export default async function svgtvi(options?: SVGTVIConfig) {
   try {
     const {
       input,
@@ -25,7 +25,7 @@ export default async function svgtvc(options?: SVGTVCConfig) {
     const outputPath = join(resolve(), output)
 
     if (!input) {
-      console.error('svgtvc: miss "input" in options')
+      console.error('svgtvi: miss "input" in options')
       return
     }
 
@@ -57,6 +57,6 @@ export default async function svgtvc(options?: SVGTVCConfig) {
 
     await generateExportFile(outputPath, files, prefix, suffix)
   } catch (error) {
-    console.error('svgtvc: an error occurred! ', error)
+    console.error('svgtvi: an error occurred! ', error)
   }
 }

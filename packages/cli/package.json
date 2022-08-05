@@ -1,13 +1,13 @@
 {
-  "name": "@svgtvc/cli",
+  "name": "@svgtvi/cli",
   "version": "0.1.0",
   "author": "dong.xing@outlook.com",
-  "description": "svgtvc cli",
-  "homepage": "https://github.com/WX-DongXing/svgtvc",
-  "repository": "https://github.com/WX-DongXing/svgtvc",
+  "description": "svgtvi cli",
+  "homepage": "https://github.com/WX-DongXing/svgtvi",
+  "repository": "https://github.com/WX-DongXing/svgtvi",
   "license": "MIT",
   "bin": {
-    "svgtvc": "lib/index.js"
+    "svgtvi": "lib/index.js"
   },
   "scripts": {
     "build": "tsup"
@@ -26,7 +26,7 @@
   "dependencies": {
     "fs-extra": "^10.1.0",
     "yargs": "^17.5.1",
-    "@svgtvc/core": "workspace:*"
+    "@svgtvi/core": "workspace:*"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",

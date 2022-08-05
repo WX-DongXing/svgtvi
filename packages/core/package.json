@@ -1,10 +1,10 @@
 {
-  "name": "@svgtvc/core",
+  "name": "@svgtvi/core",
   "version": "0.1.0",
   "author": "dong.xing@outlook.com",
   "description": "transform svgs to vue component",
-  "homepage": "https://github.com/WX-DongXing/svgtvc",
-  "repository": "https://github.com/WX-DongXing/svgtvc",
+  "homepage": "https://github.com/WX-DongXing/svgtvi",
+  "repository": "https://github.com/WX-DongXing/svgtvi",
   "license": "MIT",
   "type": "commonjs",
   "main": "lib/index.js",

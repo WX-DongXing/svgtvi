@@ -1,1 +1,1 @@
-# @svgtvc/core
+# @svgtvi/core

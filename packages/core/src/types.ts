@@ -1,8 +1,8 @@
 import type { OptimizeOptions } from 'svgo'
 
-export type TemplateParser = (fragment: SVGTVCFragement) => string
+export type TemplateParser = (fragment: SVGTVIFragement) => string
 
-export interface SVGTVCConfig {
+export interface SVGTVIConfig {
   input: string
   output?: string
   clean?: boolean
@@ -20,6 +20,6 @@ export interface SVGFile {
   tpl?: string
 }
 
-export interface SVGTVCFragement extends DocumentFragment {
+export interface SVGTVIFragement extends DocumentFragment {
   serialize: () => string
 }

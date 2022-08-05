@@ -2,7 +2,7 @@
 import { exit } from 'node:process'
 import { pathExistsSync } from 'fs-extra'
 import yargs, { Arguments } from 'yargs'
-import svgtvc from '@svgtvc/core'
+import svgtvi from '@svgtvi/core'
 
 type ArgvResult = Arguments<{
   input: string
@@ -12,7 +12,7 @@ type ArgvResult = Arguments<{
 }>
 
 const argv = yargs
-  .scriptName('svgtvc')
+  .scriptName('svgtvi')
   .usage('$0 <cmd> [args]')
   .alias('i', 'input')
   .describe('i', 'Input directory relative to the root directory')
@@ -33,7 +33,7 @@ if (!pathExistsSync(argv.input)) {
   exit()
 }
 
-svgtvc({
+svgtvi({
   input: argv.input,
   output: argv.output ?? 'dist',
   clean: true,
@@ -43,6 +43,6 @@ svgtvc({
   .then(() => {
     console.log('svgtcv: build successful!')
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('svgtcv accored error: ', error)
   })

@@ -1,1 +1,1 @@
-# @svgtvc/cli
+# @svgtvi/cli

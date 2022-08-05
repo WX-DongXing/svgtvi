@@ -6,16 +6,16 @@ import { pascalCase } from 'change-case'
 import { optimize, OptimizedSvg, OptimizeOptions } from 'svgo'
 import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
-import { TemplateParser, SVGFile, SVGTVCFragement } from './types'
+import { TemplateParser, SVGFile, SVGTVIFragement } from './types'
 
 /**
  * serialize fragment
  * @param fragment
  * @returns
  */
-export const createSVGTVCFragment = (
+export const createSVGTVIFragment = (
   fragment: DocumentFragment
-): SVGTVCFragement => {
+): SVGTVIFragement => {
   const serialize = () =>
     Array.from(fragment.children).reduce((acc: string, element: Element) => {
       return (acc += element.outerHTML)
@@ -29,7 +29,7 @@ export const createSVGTVCFragment = (
  * @param fragment
  * @returns
  */
-export const defaultTemplate: TemplateParser = (fragment: SVGTVCFragement) => {
+export const defaultTemplate: TemplateParser = (fragment: SVGTVIFragement) => {
   return `<script setup>
   </script>
   <template>
@@ -57,7 +57,7 @@ export async function readFolder(path: string): Promise<SVGFile[]> {
         }
       })
   } catch (error) {
-    console.error('svgtvc: read folder error! ', error)
+    console.error('svgtvi: read folder error! ', error)
     throw error
   }
 }
@@ -85,7 +85,7 @@ export function optimizeSvg(raw: string, svgoConfig?: OptimizeOptions): string {
     ]
   }
   const { error, ...optimized } = optimize(raw, config)
-  if (error) console.error('svgtvc: optimize svg error ', error)
+  if (error) console.error('svgtvi: optimize svg error ', error)
   return error ? raw : (optimized as OptimizedSvg).data
 }
 
@@ -108,12 +108,12 @@ export async function generateTemplate(
     const fragment = JSDOM.fragment(optimizedRaw)
 
     if (!fragment.firstChild) {
-      throw new TypeError('svgtvc: Parse file error!')
+      throw new TypeError('svgtvi: Parse file error!')
     }
 
-    const svgtvcFragment = createSVGTVCFragment(fragment)
+    const svgtviFragment = createSVGTVIFragment(fragment)
 
-    return templateParser(svgtvcFragment)
+    return templateParser(svgtviFragment)
   } catch (error) {
     console.error(error)
     throw error
