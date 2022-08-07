@@ -78,7 +78,9 @@ export function optimizeSvg(raw: string, svgoConfig?: OptimizeOptions): string {
           attributes: [
             { width: '1em' },
             { height: '1em' },
-            { fill: 'currentColor' }
+            { fill: 'currentColor' },
+            { 'aria-hidden': 'true' },
+            { focusable: 'false' }
           ]
         }
       }
