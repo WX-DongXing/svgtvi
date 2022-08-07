@@ -72,6 +72,12 @@ importers:
       '@types/jsdom': 20.0.0
       '@types/svgo': 2.6.3
 
+  packages/svgtvi-plugin-preview:
+    specifiers:
+      '@svgtvi/core': workspace:*
+    devDependencies:
+      '@svgtvi/core': link:../core
+
 packages:
 
   /@ampproject/remapping/2.2.0:

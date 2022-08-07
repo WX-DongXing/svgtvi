@@ -1,0 +1,19 @@
+{
+  "name": "@svgtvi/plugin-preview",
+  "version": "0.1.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "dev": "",
+    "build": "tsup"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@svgtvi/core": "workspace:*"
+  }
+}
