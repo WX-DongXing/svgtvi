@@ -18,6 +18,7 @@ export default async function svgtvi(options?: SVGTVIConfig) {
       clean = false,
       prefix = '',
       suffix = '',
+      plugins = [],
       template,
       svgoConfig
     } = options ?? {}
@@ -29,9 +30,15 @@ export default async function svgtvi(options?: SVGTVIConfig) {
       return
     }
 
-    if (clean) await remove(outputPath)
+    if (!Array.isArray(plugins)) {
+      console.error('svgtvi: "pligins" should be an array')
+      return
+    }
 
-    await mkdirs(join(outputPath, 'esm'))
+    if (clean) {
+      await remove(outputPath)
+      await mkdirs(outputPath)
+    }
 
     const files = await readFolder(join(resolve(), input))
 
