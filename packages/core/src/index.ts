@@ -1,14 +1,14 @@
 import { join, resolve } from 'node:path'
 import { remove, mkdirs } from 'fs-extra'
+import { readFolders, generate } from './core'
+import { BUILD_PLUGINS } from './constants'
 import {
-  readFolder,
-  generateTemplate,
-  compiler,
-  transformToCjs,
-  generateFile,
-  generateExportFile
-} from './core'
-import { SVGTVIConfig } from './types'
+  FunctionalBuildPlugin,
+  PluginBase,
+  SVGFile,
+  SVGFolder,
+  SVGTVIConfig
+} from './types'
 
 export default async function svgtvi(options?: SVGTVIConfig) {
   try {
@@ -40,30 +40,52 @@ export default async function svgtvi(options?: SVGTVIConfig) {
       await mkdirs(outputPath)
     }
 
-    const files = await readFolder(join(resolve(), input))
+    let folders = await readFolders(join(resolve(), input))
 
-    for await (const file of files) {
-      const tpl = await generateTemplate(file, template, svgoConfig)
-      const esmCode = compiler({ ...file, tpl })
-      const cjsCode = await transformToCjs(esmCode)
-      await generateFile(
-        outputPath,
-        cjsCode,
-        file.componentName,
-        prefix,
-        suffix
-      )
-      await generateFile(
-        join(outputPath, 'esm'),
-        esmCode,
-        file.componentName,
-        prefix,
-        suffix
+    const hasFolder = folders.some(folder => !!folder.children)
+
+    if (hasFolder) {
+      folders = folders.reduce(
+        (acc: SVGFolder[], folder: SVGFile | SVGFolder) => {
+          if (folder.children) {
+            acc.push(folder as SVGFolder)
+          } else {
+            acc[0].children.push(folder as SVGFile)
+          }
+          return acc
+        },
+        [
+          {
+            name: 'ungrounped',
+            path: join(resolve(), input, 'ungrounped'),
+            children: []
+          }
+        ]
       )
     }
 
-    await generateExportFile(outputPath, files, prefix, suffix)
+    for await (const folder of folders) {
+      await generate(outputPath, folder, template, svgoConfig, prefix, suffix)
+    }
+
+    const buildPlugins = plugins.filter(plugin => {
+      if (typeof plugin === 'string') {
+        return BUILD_PLUGINS.includes(plugin)
+      } else if (typeof plugin === 'object' && typeof plugin !== 'function') {
+        return (plugin as PluginBase).apply === 'build'
+      } else if (typeof plugin === 'function') {
+        return (plugin as FunctionalBuildPlugin)({}).apply === 'build'
+      }
+      return false
+    })
+
+    console.log('plugins: ', buildPlugins)
   } catch (error) {
     console.error('svgtvi: an error occurred! ', error)
   }
 }
+
+svgtvi({
+  input: '../../svgs',
+  clean: true
+})

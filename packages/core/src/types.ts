@@ -3,18 +3,20 @@ import { PLIGINS } from './constants'
 
 export type TemplateParser = (fragment: SVGTVIFragement) => string
 
-export interface FunctionalPluginBase {
+export interface PluginBase {
   name: string
   apply: string
 }
 
-export interface FunctionalBuildPlugin extends FunctionalPluginBase {
+export interface BuildPlugin extends PluginBase {
   excutor: () => void
 }
 
-export type FunctionalPlugin = (options: Record<string, unknown>) => FunctionalBuildPlugin
+export type FunctionalBuildPlugin = (options: Record<string, unknown>) => BuildPlugin
 
-export type Plugin = typeof PLIGINS[number] | FunctionalPlugin
+export type FunctionalPlugin = FunctionalBuildPlugin
+
+export type Plugin = typeof PLIGINS[number] | BuildPlugin | FunctionalPlugin
 
 export interface SVGTVIConfig {
   input: string
@@ -29,10 +31,17 @@ export interface SVGTVIConfig {
 
 export interface SVGFile {
   name: string
-  componentName: string
+  fileName: string
   path: string
   raw?: string
   tpl?: string
+  children?: unknown
+}
+
+export interface SVGFolder {
+  name: string
+  path: string
+  children: SVGFile[]
 }
 
 export interface SVGTVIFragement extends DocumentFragment {

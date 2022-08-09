@@ -1,12 +1,14 @@
 import { JSDOM } from 'jsdom'
 import { join } from 'node:path'
+import { statSync } from 'node:fs'
+import { mkdirs } from 'fs-extra'
 import { transformAsync } from '@babel/core'
 import { readdir, readFile, writeFile } from 'fs/promises'
 import { pascalCase } from 'change-case'
 import { optimize, OptimizedSvg, OptimizeOptions } from 'svgo'
-import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
-import { TemplateParser, SVGFile, SVGTVIFragement } from './types'
+import { TemplateParser, SVGFile, SVGTVIFragement, SVGFolder } from './types'
+import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
 
 /**
  * serialize fragment
@@ -39,27 +41,40 @@ export const defaultTemplate: TemplateParser = (fragment: SVGTVIFragement) => {
 }
 
 /**
- * get folder svg files
+ * read two level folders
  * @param path
+ * @param level
  * @returns
  */
-export async function readFolder(path: string): Promise<SVGFile[]> {
-  try {
-    const fileNames = await readdir(path)
-    return fileNames
-      .filter((fileName: string) => /.svg$/.test(fileName))
-      .map((fileName: string) => {
-        const name = fileName.replace(/(.+).svg/, '$1')
-        return {
-          name,
-          componentName: pascalCase(name),
-          path: join(path, fileName)
-        }
+export async function readFolders(
+  path: string,
+  level = 2
+): Promise<Array<SVGFolder | SVGFile>> {
+  if (!level) return []
+  level--
+  const fileNames = await readdir(path)
+  const folders: Array<SVGFolder | SVGFile> = []
+  for await (const fileName of fileNames) {
+    if (/^\./.test(fileName)) continue
+    const filePath = join(path, fileName)
+    const isDirectory = statSync(filePath).isDirectory()
+    if (isDirectory && !level) continue
+    if (isDirectory) {
+      const directory = await readFolders(filePath, level)
+      folders.push({
+        name: fileName,
+        path: filePath,
+        children: directory as SVGFile[]
       })
-  } catch (error) {
-    console.error('svgtvi: read folder error! ', error)
-    throw error
+    } else {
+      folders.push({
+        name: fileName.replace(/(.+).svg/, '$1'),
+        fileName: fileName,
+        path: filePath
+      })
+    }
   }
+  return folders
 }
 
 /**
@@ -171,32 +186,25 @@ export async function transformToCjs(code: string): Promise<string> {
  * @param outputPath
  * @param code
  * @param componentName
- * @param prefix
- * @param suffix
  * @param customPropsType
  */
 export async function generateFile(
   outputPath: string,
   code: string,
   componentName: string,
-  prefix?: string,
-  suffix?: string,
   customPropsType?: string
 ) {
-  const name = prefix + componentName + suffix
   const type = `import { FunctionalComponent, HTMLAttributes, VNodeProps } from "vue"
-declare const ${name}: FunctionalComponent<HTMLAttributes & VNodeProps>
-export default ${name}`
-  await writeFile(join(outputPath, `${name}.js`), code)
-  await writeFile(join(outputPath, `${name}.d.ts`), type)
+declare const ${componentName}: FunctionalComponent<HTMLAttributes & VNodeProps>
+export default ${componentName}`
+  await writeFile(join(outputPath, `${componentName}.js`), code)
+  await writeFile(join(outputPath, `${componentName}.d.ts`), type)
 }
 
 /**
  * generate export file
  * @param outputPath
  * @param svgFiles
- * @param prefix
- * @param suffix
  */
 export async function generateExportFile(
   outputPath: string,
@@ -205,10 +213,10 @@ export async function generateExportFile(
   suffix?: string
 ) {
   const { cjs, esm } = svgFiles.reduce(
-    (acc, { componentName }: SVGFile) => {
-      const name = prefix + componentName + suffix
-      acc.cjs += `module.exports.${name} = require('./${name}.js')\n`
-      acc.esm += `export { default as ${name} } from './${name}'\n`
+    (acc, { name }: SVGFile) => {
+      const componentName = prefix + pascalCase(name) + suffix
+      acc.cjs += `module.exports.${componentName} = require('./${componentName}.js')\n`
+      acc.esm += `export { default as ${componentName} } from './${componentName}'\n`
       return acc
     },
     { cjs: '', esm: '', type: '' }
@@ -217,4 +225,26 @@ export async function generateExportFile(
   await writeFile(join(outputPath, 'index.d.ts'), esm)
   await writeFile(join(outputPath, 'esm/index.js'), esm)
   await writeFile(join(outputPath, 'esm/index.d.ts'), esm)
+}
+
+export async function generate(
+  path: string,
+  folder: SVGFile | SVGFolder,
+  template?: TemplateParser,
+  svgoConfig?: OptimizeOptions,
+  prefix?: string,
+  suffix?: string
+) {
+  const files = (folder.children || [folder]) as SVGFile[]
+  const outputPath = join(path, folder.children ? folder.name : '')
+  for await (const file of files) {
+    await mkdirs(join(outputPath, 'esm'))
+    const tpl = await generateTemplate(file, template, svgoConfig)
+    const esmCode = compiler({ ...file, tpl })
+    const cjsCode = await transformToCjs(esmCode)
+    const componentName = prefix + pascalCase(file.name) + suffix
+    await generateFile(outputPath, cjsCode, componentName)
+    await generateFile(join(outputPath, 'esm'), esmCode, componentName)
+  }
+  await generateExportFile(outputPath, files, prefix, suffix)
 }
