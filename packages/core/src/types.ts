@@ -23,16 +23,16 @@ export interface SVGTVIFragement extends DocumentFragment {
 
 export type TemplateParser = (fragment: SVGTVIFragement) => string
 
+export interface BuildPluginOptions {
+  output: string
+  folders: Array<SVGFile | SVGFolder>
+}
+
 export interface PluginBase {
   name: string
   apply: string
   params?: Record<string, unknown>
   handler?: (options?: BuildPluginOptions) => void
-}
-
-export interface BuildPluginOptions {
-  output: string
-  folders: Array<SVGFile | SVGFolder>
 }
 
 export type FunctionalPlugin = (params?: Record<string, unknown>, options?: BuildPluginOptions) => PluginBase

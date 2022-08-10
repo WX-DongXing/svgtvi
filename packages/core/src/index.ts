@@ -39,7 +39,18 @@ export default async function svgtvi(options?: SVGTVIConfig) {
 
     let folders = await readFolders(join(resolve(), input))
 
-    const hasFolder = folders.some(folder => !!folder.children)
+    const { hasFolder, hasFile } = folders.reduce(
+      (acc, cur) => {
+        if (!acc.hasFolder) {
+          acc.hasFolder = !!cur.children
+        }
+        if (!acc.hasFile) {
+          acc.hasFile = !cur.children
+        }
+        return acc
+      },
+      { hasFolder: false, hasFile: false }
+    )
 
     if (hasFolder) {
       folders = folders.reduce(
@@ -51,13 +62,15 @@ export default async function svgtvi(options?: SVGTVIConfig) {
           }
           return acc
         },
-        [
-          {
-            name: 'ungrounped',
-            path: join(resolve(), input, 'ungrounped'),
-            children: []
-          }
-        ]
+        hasFile
+          ? [
+              {
+                name: 'ungrounped',
+                path: join(resolve(), input, 'ungrounped'),
+                children: []
+              }
+            ]
+          : []
       )
     }
 
