@@ -1,4 +1,4 @@
-import { join, resolve } from 'node:path'
+import { join } from 'node:path'
 import { writeFile } from 'fs/promises'
 import type { BuildPluginOptions } from '@svgtvi/core'
 
@@ -12,13 +12,42 @@ export interface PreviewPluginParams {
 interface IconImports {
   maps: string[]
   imports: string[]
-  icons: string[]
+  groups: string[]
 }
 
 async function buildPage(
   output, hasGroup, name, version,
-  description, repository, maps, imports, icons
+  description, repository, maps, imports, groups
 ) {
+  const template = hasGroup
+    ? `
+    <div class="group"
+      v-for="{ name, icons } in groups"
+      :key="name"
+    >
+      <h3 class="title">{{ name }}</h3>
+      <div class="icons">
+        <div class="icon"
+          v-for="(icon, index) in icons"
+          :key="index"
+        >
+          <component :is="icon" />
+        </div>
+      </div>
+    </div>`
+    : `
+    <div class="group">
+      <div
+        class="icons"
+        v-for="(icon, index) in groups"
+        :key="index"
+      >
+        <div class="icon">
+          <component :is="icon"/>
+        </div>
+      </div>
+    </div>
+    `
   const html = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -33,31 +62,43 @@ async function buildPage(
         {
           "imports": {
             "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-            ${maps.join()}
+            ${maps.join(',\n')}
           }
         }
       </script>
     </head>
     <body>
-    <main id="app"><aside><div class="brand">Icon<h3>{{ name }}<sup>{{ version }}</sup></h3><p>{{ description }}</p></div><a :href="repository" target="_blank"><svg            height="32"            aria-hidden="true"            viewBox="0 0 16 16"            version="1.1"            width="32"            data-view-component="true"            class="octicon octicon-mark-github v-align-middle"          ><path              fill-rule="evenodd"              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"            ></path></svg></a></aside><section><div class="group"><h3 class="title">Solid</h3><div class="icons"><div class="icon"><component :is="Battery" /></div></div></div></section></main>
-    <div class="ellipse ellipse-right"></div>
-    <div class="ellipse ellipse-center"></div>
-    <div class="ellipse ellipse-left"></div>
-    <script type="module">
-      import { createApp } from 'vue'
-      ${imports.join('\n')}
+      <main id="app">
+        <aside>
+          <div class="brand">
+            Icon
+            <h3>{{name}}<sup>{{version}}</sup></h3>
+            <p>{{description}}</p>
+          </div>
+          <a href="${repository}"target="_blank"><svg height="32"aria-hidden="true"viewBox="0 0 16 16"version="1.1"width="32"data-view-component="true"class="octicon octicon-mark-github v-align-middle"><path fill-rule="evenodd"d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+        </aside>
+        <section>
+          ${template}
+        </section>
+      </main>
+      <div class="ellipse ellipse-right"></div>
+      <div class="ellipse ellipse-center"></div>
+      <div class="ellipse ellipse-left"></div>
+      <script type="module">
+        import { createApp, computed } from 'vue'
+        ${imports.join('\n')}
 
-      const app = createApp({
-        setup() {
-          return {
-            name: "${name}",
-            version: "${version}",
-            description: "${description}",
-            repository: "${repository}",
-            icons: [${icons.join()}]
+        const app = createApp({
+          setup() {
+            return {
+              name: "${name}",
+              version: "${version}",
+              description: "${description}",
+              repository: "${repository}",
+              groups: [${groups}]
+            }
           }
-        }
-      })
+        })
       // app.component()
       app.mount('#app')
     </script>
@@ -79,23 +120,23 @@ const PreviewPlugin = (params: PreviewPluginParams) => {
     apply: 'build',
     handler: async ({ output, folders }: BuildPluginOptions) => {
       let maps = [`"@${name}/icons": "./esm/index.js"`]
-      let imports = [`import * as Icons from "@${name}/icons"`]
-      let icons = ['...Icons']
+      let imports = [`import * as icons from "@${name}/icons"`]
+      let groups = ['...Object.values(icons)']
 
       const hasGroup = folders.some(folder => !!folder.children)
       if (hasGroup) {
-        const groups = folders.reduce<IconImports>((acc, cur) => {
-          const { maps, imports, icons } = acc
+        const content = folders.reduce<IconImports>((acc, cur) => {
+          const { maps, imports, groups } = acc
           if (cur.children) {
             maps.push(`"@${name}/${cur.name}": "./${cur.name}/esm/index.js"`)
             imports.push(`import * as ${cur.name} from "@${name}/${cur.name}"`)
-            icons.push(`...${cur.name}`)
+            groups.push(`{ name: "${cur.name}", icons: Object.values(${cur.name}) }`)
           }
           return acc
-        }, { maps: [], imports: [], icons: [] })
-        maps = groups.maps
-        imports = groups.imports
-        icons = groups.icons
+        }, { maps: [], imports: [], groups: [] })
+        maps = content.maps
+        imports = content.imports
+        groups = content.groups
       }
       await buildPage(
         output,
@@ -106,7 +147,7 @@ const PreviewPlugin = (params: PreviewPluginParams) => {
         repository,
         maps,
         imports,
-        icons
+        groups
       )
     }
   }
