@@ -31,6 +31,7 @@ export interface PluginBase {
 }
 
 export interface BuildPluginOptions {
+  output: string
   folders: Array<SVGFile | SVGFolder>
 }
 

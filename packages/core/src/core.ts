@@ -276,18 +276,19 @@ export async function generateExportFile(
   outputPath: string,
   svgFiles: SVGFile[]
 ) {
-  const { cjs, esm } = svgFiles.reduce(
+  const { cjs, esm, type } = svgFiles.reduce(
     (acc, { componentName }: SVGFile) => {
       acc.cjs += `module.exports.${componentName} = require('./${componentName}.js')\n`
-      acc.esm += `export { default as ${componentName} } from './${componentName}'\n`
+      acc.esm += `export { default as ${componentName} } from './${componentName}.js'\n`
+      acc.type += `export { default as ${componentName} } from './${componentName}'\n`
       return acc
     },
     { cjs: '', esm: '', type: '' }
   )
   await writeFile(join(outputPath, 'index.js'), cjs)
-  await writeFile(join(outputPath, 'index.d.ts'), esm)
+  await writeFile(join(outputPath, 'index.d.ts'), type)
   await writeFile(join(outputPath, 'esm/index.js'), esm)
-  await writeFile(join(outputPath, 'esm/index.d.ts'), esm)
+  await writeFile(join(outputPath, 'esm/index.d.ts'), type)
 }
 
 export async function generate(

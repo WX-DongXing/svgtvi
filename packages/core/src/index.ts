@@ -68,7 +68,7 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     // mount plugins after build
     for await (const plugin of buildPlugins) {
       const { handler } = plugin as PluginBase
-      handler && handler({ folders })
+      handler && handler({ output, folders })
     }
   } catch (error) {
     console.error('svgtvi: an error occurred! ', error)
