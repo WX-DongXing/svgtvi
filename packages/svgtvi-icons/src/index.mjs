@@ -6,7 +6,12 @@ svgtvi({
   plugins: [
     {
       name: 'preview',
-      params: {}
+      params: {
+        name: 'Svgtvi Icon',
+        version: '0.1.0',
+        description: 'svgtvi icons',
+        repository: 'https://github.com/WX-DongXing/svgtvi.git'
+      }
     }
   ]
 })
