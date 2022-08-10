@@ -44,7 +44,7 @@
         top: 120px;
         right: 0;
         height: calc(100vh - 240px);
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
       }
       aside .brand {
         display: flex;
@@ -89,6 +89,9 @@
       }
       .icon {
         flex: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 64px;
         height: 64px;
         color: black;
@@ -97,6 +100,7 @@
         background: rgba(255, 255, 255, 1);
         filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.1));
         transition: all 0.1s;
+        font-size: 32px;
       }
       .icon:hover {
         color: white;
@@ -130,34 +134,20 @@
         left: 40%;
       }
     </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+          "@svgtvi/icons": "./dist/solid/esm/index.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <main id="app">
       <aside>
         <div class="brand">
-          <svg
-            width="84"
-            height="84"
-            viewBox="0 0 322 323"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g fill="none" fill-rule="evenodd">
-              <path
-                fill="#3662EB"
-                d="M67 131.25l20 40.25 138.25 23L322 3.25z"
-              />
-              <path
-                fill-opacity=".5"
-                fill="#3662EB"
-                d="M98.75 196.75L162 322.5l53-106.75z"
-              />
-              <path
-                stroke="#3662EB"
-                stroke-width="5"
-                d="M57 109L4.25 3.25H271.5z"
-              />
-            </g>
-          </svg>
+          Icon
           <h3>{{ name }}<sup>{{ version }}</sup></h3>
           <p>{{ description }}</p>
         </div>
@@ -182,12 +172,9 @@
         <div class="group">
           <h3 class="title">Solid</h3>
           <div class="icons">
-            <div class="icon"></div>
-            <div class="icon"></div>
-            <div class="icon"></div>
-            <div class="icon"></div>
-            <div class="icon"></div>
-            <div class="icon"></div>
+            <div class="icon">
+              <component :is="Battery" />
+            </div>
           </div>
         </div>
       </section>
@@ -195,16 +182,20 @@
     <div class="ellipse ellipse-right"></div>
     <div class="ellipse ellipse-center"></div>
     <div class="ellipse ellipse-left"></div>
-
     <script type="module">
-      import { createApp } from 'https://unpkg.com/petite-vue?module'
-      createApp({
-        name: 'Svgtvi Icon',
-        version: '1.0.0',
-        description: 'svg to vue icon',
-        repository: '',
-        icons: []
-      }).mount('#app')
+      import { createApp } from 'vue'
+      import * as icons from '@svgtvi/icons'
+
+      const app = createApp({
+        setup() {
+          return {
+            name: 'xxxx',
+            icons: '$icons$'
+          }
+        }
+      })
+      // app.component()
+      app.mount('#app')
     </script>
   </body>
 </html>

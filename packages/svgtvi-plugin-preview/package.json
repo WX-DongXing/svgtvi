@@ -1,18 +1,32 @@
 {
   "name": "@svgtvi/plugin-preview",
   "version": "0.1.0",
-  "description": "",
+  "author": "dong.xing@outlook.com",
+  "description": "svgtvi preview plugin",
+  "homepage": "https://github.com/WX-DongXing/svgtvi",
+  "repository": "https://github.com/WX-DongXing/svgtvi",
+  "license": "MIT",
+  "type": "commonjs",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "dev": "",
     "build": "tsup"
   },
+  "keywords": [
+    "svgtvi",
+    "icons",
+    "@svgtvi/icons"
+  ],
   "files": [
     "lib"
   ],
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    }
+  },
   "devDependencies": {
     "@svgtvi/core": "workspace:*"
   }
