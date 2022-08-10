@@ -7,8 +7,17 @@ import { readdir, readFile, writeFile } from 'fs/promises'
 import { pascalCase } from 'change-case'
 import { optimize, OptimizedSvg, OptimizeOptions } from 'svgo'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
-import { TemplateParser, SVGFile, SVGTVIFragement, SVGFolder } from './types'
 import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
+import {
+  TemplateParser,
+  SVGFile,
+  SVGTVIFragement,
+  SVGFolder,
+  Plugin,
+  PluginBase,
+  ImportPlugin,
+  FunctionalPlugin
+} from './types'
 
 /**
  * serialize fragment
@@ -78,6 +87,54 @@ export async function readFolders(
 }
 
 /**
+ * import plugin by name
+ * @param name
+ * @returns
+ */
+export async function importPluign(name: string): Promise<ImportPlugin> {
+  try {
+    const plugin = await import(name)
+    return { apply: plugin.default().apply, plugin: plugin.default }
+  } catch (error) {
+    console.error('svgtci: ', error)
+    return { error }
+  }
+}
+
+/**
+ * split plugins
+ * @param plugins
+ * @returns
+ */
+export async function splitPlugins(
+  plugins: Plugin[]
+): Promise<Record<string, Plugin[]>> {
+  const buildPlugins: Plugin[] = []
+
+  for await (const plugin of plugins) {
+    if (typeof plugin === 'string') {
+      const { error, apply, plugin: importedPlugin } = await importPluign(
+        plugin
+      )
+      if (error) continue
+      if (apply === 'build' && typeof importPluign === 'function') {
+        buildPlugins.push((importedPlugin as FunctionalPlugin)({}))
+      }
+    } else if (typeof plugin === 'object') {
+      if ((plugin as PluginBase).apply === 'build') {
+        buildPlugins.push(plugin)
+      }
+    } else if (typeof plugin === 'function') {
+      buildPlugins.push(plugin({}))
+    }
+  }
+
+  return {
+    buildPlugins
+  }
+}
+
+/**
  * optimize svg by svgo
  * @param raw
  * @param svgoConfig
@@ -127,9 +184,7 @@ export async function generateTemplate(
     if (!fragment.firstChild) {
       throw new TypeError('svgtvi: Parse file error!')
     }
-
     const svgtviFragment = createSVGTVIFragment(fragment)
-
     return templateParser(svgtviFragment)
   } catch (error) {
     console.error(error)
@@ -208,13 +263,10 @@ export default ${componentName}`
  */
 export async function generateExportFile(
   outputPath: string,
-  svgFiles: SVGFile[],
-  prefix?: string,
-  suffix?: string
+  svgFiles: SVGFile[]
 ) {
   const { cjs, esm } = svgFiles.reduce(
-    (acc, { name }: SVGFile) => {
-      const componentName = prefix + pascalCase(name) + suffix
+    (acc, { componentName }: SVGFile) => {
       acc.cjs += `module.exports.${componentName} = require('./${componentName}.js')\n`
       acc.esm += `export { default as ${componentName} } from './${componentName}'\n`
       return acc
@@ -240,11 +292,12 @@ export async function generate(
   for await (const file of files) {
     await mkdirs(join(outputPath, 'esm'))
     const tpl = await generateTemplate(file, template, svgoConfig)
+    const componentName = prefix + pascalCase(file.name) + suffix
     const esmCode = compiler({ ...file, tpl })
     const cjsCode = await transformToCjs(esmCode)
-    const componentName = prefix + pascalCase(file.name) + suffix
     await generateFile(outputPath, cjsCode, componentName)
     await generateFile(join(outputPath, 'esm'), esmCode, componentName)
+    Object.assign(file, { componentName, output: outputPath })
   }
-  await generateExportFile(outputPath, files, prefix, suffix)
+  await generateExportFile(outputPath, files)
 }

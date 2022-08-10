@@ -1,14 +1,15 @@
 import { join, resolve } from 'node:path'
 import { remove, mkdirs } from 'fs-extra'
-import { readFolders, generate } from './core'
-import { BUILD_PLUGINS } from './constants'
+import { readFolders, generate, splitPlugins, importPluign } from './core'
 import {
-  FunctionalBuildPlugin,
-  PluginBase,
   SVGFile,
   SVGFolder,
-  SVGTVIConfig
+  SVGTVIConfig,
+  PluginBase,
+  FunctionalPlugin
 } from './types'
+
+export * from './types'
 
 export default async function svgtvi(options?: SVGTVIConfig) {
   try {
@@ -40,6 +41,8 @@ export default async function svgtvi(options?: SVGTVIConfig) {
       await mkdirs(outputPath)
     }
 
+    const { buildPlugins } = await splitPlugins(plugins)
+
     let folders = await readFolders(join(resolve(), input))
 
     const hasFolder = folders.some(folder => !!folder.children)
@@ -68,24 +71,23 @@ export default async function svgtvi(options?: SVGTVIConfig) {
       await generate(outputPath, folder, template, svgoConfig, prefix, suffix)
     }
 
-    const buildPlugins = plugins.filter(plugin => {
-      if (typeof plugin === 'string') {
-        return BUILD_PLUGINS.includes(plugin)
-      } else if (typeof plugin === 'object' && typeof plugin !== 'function') {
-        return (plugin as PluginBase).apply === 'build'
-      } else if (typeof plugin === 'function') {
-        return (plugin as FunctionalBuildPlugin)({}).apply === 'build'
+    // mount plugins after build
+    for await (const plugin of buildPlugins) {
+      const { name, params, handler } = plugin as PluginBase
+      if (handler) {
+        handler({ folders })
+      } else {
+        const { error, plugin: importedPlugin } = await importPluign(name)
+        if (error) continue
+        if (typeof importedPlugin === 'function') {
+          const {
+            handler: importedHandler
+          } = (importedPlugin as FunctionalPlugin)(params)
+          importedHandler && importedHandler({ folders })
+        }
       }
-      return false
-    })
-
-    console.log('plugins: ', buildPlugins)
+    }
   } catch (error) {
     console.error('svgtvi: an error occurred! ', error)
   }
 }
-
-svgtvi({
-  input: '../../svgs',
-  clean: true
-})

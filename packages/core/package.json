@@ -16,9 +16,10 @@
   "keywords": [
     "svg",
     "vue",
+    "icon",
     "vue3",
     "svg-to-vue",
-    "svg-to-vue-component"
+    "svg-to-vue-icon"
   ],
   "files": [
     "lib"
@@ -27,7 +28,7 @@
     ".": {
       "import": "./lib/index.mjs",
       "require": "./lib/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./lib/index.d.ts"
     }
   },
   "dependencies": {
