@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "packageManager": "pnpm@7.8.0",
   "scripts": {
-    "build:cli": "npm run build --prefix packages/cli",
     "build:core": "npm run build --prefix packages/core",
-    "build": "run-s build:core build:cli"
+    "build:cli": "npm run build --prefix packages/cli",
+    "build:plugin": "npm run build --prefix packages/svgtvi-plugin-preview",
+    "build": "run-p build:*"
   },
   "engines": {
     "node": ">=16.13.0"

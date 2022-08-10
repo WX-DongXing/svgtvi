@@ -121,7 +121,18 @@ export async function splitPlugins(
         buildPlugins.push((importedPlugin as FunctionalPlugin)({}))
       }
     } else if (typeof plugin === 'object') {
-      if ((plugin as PluginBase).apply === 'build') {
+      const { name, apply, params, handler } = plugin as PluginBase
+      if (!handler) {
+        const {
+          error,
+          apply: importedApply,
+          plugin: importedPlugin
+        } = await importPluign(`@svgtvi/plugin-${name}`)
+        if (error) continue
+        if (importedApply === 'build' && typeof importPluign === 'function') {
+          buildPlugins.push((importedPlugin as FunctionalPlugin)(params))
+        }
+      } else if (apply === 'build') {
         buildPlugins.push(plugin)
       }
     } else if (typeof plugin === 'function') {

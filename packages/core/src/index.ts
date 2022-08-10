@@ -1,13 +1,7 @@
 import { join, resolve } from 'node:path'
 import { remove, mkdirs } from 'fs-extra'
-import { readFolders, generate, splitPlugins, importPluign } from './core'
-import {
-  SVGFile,
-  SVGFolder,
-  SVGTVIConfig,
-  PluginBase,
-  FunctionalPlugin
-} from './types'
+import { readFolders, generate, splitPlugins } from './core'
+import { SVGFile, SVGFolder, SVGTVIConfig, PluginBase } from './types'
 
 export * from './types'
 
@@ -73,19 +67,8 @@ export default async function svgtvi(options?: SVGTVIConfig) {
 
     // mount plugins after build
     for await (const plugin of buildPlugins) {
-      const { name, params, handler } = plugin as PluginBase
-      if (handler) {
-        handler({ folders })
-      } else {
-        const { error, plugin: importedPlugin } = await importPluign(name)
-        if (error) continue
-        if (typeof importedPlugin === 'function') {
-          const {
-            handler: importedHandler
-          } = (importedPlugin as FunctionalPlugin)(params)
-          importedHandler && importedHandler({ folders })
-        }
-      }
+      const { handler } = plugin as PluginBase
+      handler && handler({ folders })
     }
   } catch (error) {
     console.error('svgtvi: an error occurred! ', error)
