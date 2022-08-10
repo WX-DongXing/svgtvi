@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { statSync } from 'node:fs'
 import { mkdirs } from 'fs-extra'
 import { transformAsync } from '@babel/core'
-import { readdir, readFile, writeFile } from 'fs/promises'
+import { readdir, readFile, writeFile, appendFile } from 'fs/promises'
 import { pascalCase } from 'change-case'
 import { optimize, OptimizedSvg, OptimizeOptions } from 'svgo'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
@@ -274,7 +274,8 @@ export default ${componentName}`
  */
 export async function generateExportFile(
   outputPath: string,
-  svgFiles: SVGFile[]
+  svgFiles: SVGFile[],
+  append: boolean
 ) {
   const { cjs, esm, type } = svgFiles.reduce(
     (acc, { componentName }: SVGFile) => {
@@ -285,12 +286,28 @@ export async function generateExportFile(
     },
     { cjs: '', esm: '', type: '' }
   )
-  await writeFile(join(outputPath, 'index.js'), cjs)
-  await writeFile(join(outputPath, 'index.d.ts'), type)
-  await writeFile(join(outputPath, 'esm/index.js'), esm)
-  await writeFile(join(outputPath, 'esm/index.d.ts'), type)
+  if (append) {
+    await appendFile(join(outputPath, 'index.js'), cjs)
+    await appendFile(join(outputPath, 'index.d.ts'), type)
+    await appendFile(join(outputPath, 'esm/index.js'), esm)
+    await appendFile(join(outputPath, 'esm/index.d.ts'), type)
+  } else {
+    await writeFile(join(outputPath, 'index.js'), cjs)
+    await writeFile(join(outputPath, 'index.d.ts'), type)
+    await writeFile(join(outputPath, 'esm/index.js'), esm)
+    await writeFile(join(outputPath, 'esm/index.d.ts'), type)
+  }
 }
 
+/**
+ * generate icon package
+ * @param path
+ * @param folder
+ * @param template
+ * @param svgoConfig
+ * @param prefix
+ * @param suffix
+ */
 export async function generate(
   path: string,
   folder: SVGFile | SVGFolder,
@@ -311,5 +328,5 @@ export async function generate(
     await generateFile(join(outputPath, 'esm'), esmCode, componentName)
     Object.assign(file, { componentName, output: outputPath })
   }
-  await generateExportFile(outputPath, files)
+  await generateExportFile(outputPath, files, !folder.children)
 }
