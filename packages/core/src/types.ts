@@ -21,7 +21,12 @@ export interface SVGTVIFragement extends DocumentFragment {
   serialize: () => string
 }
 
-export type TemplateParser = (fragment: SVGTVIFragement) => string
+export interface TemplateParserOptions {
+  fragment: SVGTVIFragement
+  group: string
+}
+
+export type TemplateParser = (options: TemplateParserOptions) => string
 
 export interface BuildPluginOptions {
   output: string

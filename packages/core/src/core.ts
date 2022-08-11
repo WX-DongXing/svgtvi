@@ -16,7 +16,8 @@ import {
   Plugin,
   PluginBase,
   ImportPlugin,
-  FunctionalPlugin
+  FunctionalPlugin,
+  TemplateParserOptions
 } from './types'
 
 /**
@@ -40,7 +41,9 @@ export const createSVGTVIFragment = (
  * @param fragment
  * @returns
  */
-export const defaultTemplate: TemplateParser = (fragment: SVGTVIFragement) => {
+export const defaultTemplate: TemplateParser = ({
+  fragment
+}: TemplateParserOptions) => {
   return `<script setup>
   </script>
   <template>
@@ -183,6 +186,7 @@ export function optimizeSvg(raw: string, svgoConfig?: OptimizeOptions): string {
  */
 export async function generateTemplate(
   svgFile: SVGFile,
+  group: string,
   template?: TemplateParser,
   svgoConfig?: OptimizeOptions
 ): Promise<string> {
@@ -196,7 +200,7 @@ export async function generateTemplate(
       throw new TypeError('svgtvi: Parse file error!')
     }
     const svgtviFragment = createSVGTVIFragment(fragment)
-    return templateParser(svgtviFragment)
+    return templateParser({ fragment: svgtviFragment, group })
   } catch (error) {
     console.error(error)
     throw error
@@ -317,10 +321,11 @@ export async function generate(
   suffix?: string
 ) {
   const files = (folder.children || [folder]) as SVGFile[]
-  const outputPath = join(path, folder.children ? folder.name : '')
+  const group = folder.children ? folder.name : ''
+  const outputPath = join(path, group)
   for await (const file of files) {
     await mkdirs(join(outputPath, 'esm'))
-    const tpl = await generateTemplate(file, template, svgoConfig)
+    const tpl = await generateTemplate(file, group, template, svgoConfig)
     const componentName = prefix + pascalCase(file.name) + suffix
     const esmCode = compiler({ ...file, tpl })
     const cjsCode = await transformToCjs(esmCode)
