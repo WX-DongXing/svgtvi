@@ -36,15 +36,16 @@ async function buildPage(
       </div>
     </div>`
     : `
-    <div class="group">
+    <div
+      class="icons"
+      
+    >
       <div
-        class="icons"
+        class="icon"
         v-for="(icon, index) in groups"
         :key="index"
       >
-        <div class="icon">
-          <component :is="icon"/>
-        </div>
+        <component :is="icon"/>
       </div>
     </div>
     `
