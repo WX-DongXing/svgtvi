@@ -1,1 +1,0 @@
-# @svgtvi/icons
