@@ -20,5 +20,48 @@
 ## 使用
 ### 命令行
 ```
-pnpm install @svgtvi/cli
+pnpm install @svgtvi/cli -g
+```
+
+```
+svgtvi <cmd> [args]
+
+Options:
+  -i, --input    Input directory relative to the root directory
+  -o, --output   Output directory
+  -p, --prefix   Icon name prefix
+  -s, --suffix   Icon name suffix
+  -v, --version  Show version number                                   [boolean]
+  -h, --help     Show help                                             [boolean]
+```
+
+### 代码
+```
+pnpm install @svgtvi/core --dev
+```
+
+##### cjs
+```
+const svgtvi = require('@svgtvi/core')
+```
+
+##### esm
+```
+import svgtvi from '@svgtvi/core'
+```
+
+
+```javascript
+svgtvi({
+    input: './source',
+    output: 'dist',
+    clean: true,
+    plugins: ['@svgtvi/plugin-preview']
+})
+.then(() => {
+    console.log('Successfully!');
+})
+.catch(error => {
+    console.error('Failed!');
+})
 ```
