@@ -1,5 +1,6 @@
-import { join } from 'node:path'
-import { writeFile } from 'fs/promises'
+import { join, resolve } from 'node:path'
+import { writeFile, lstat } from 'fs/promises'
+import { readJSON, copyFile } from 'fs-extra'
 import type { BuildPluginOptions } from '@svgtvi/core'
 
 export interface PreviewPluginParams {
@@ -7,6 +8,7 @@ export interface PreviewPluginParams {
   version?: string
   description?: string
   repository?: string
+  logo?: string
 }
 
 interface IconImports {
@@ -15,9 +17,73 @@ interface IconImports {
   groups: string[]
 }
 
+/**
+ * read package.json
+ */
+async function readPkgJson(): Promise<Record<string, unknown>> {
+  try {
+    const path = join(resolve(), 'package.json')
+    const json = await readJSON(path)
+    return json ?? {}
+  } catch (error) {
+    console.error('@svgtvi/plugin-preview: "package.json" not found!')
+    return {}
+  }
+}
+
+/**
+ * read logo and copy logo to output
+ * @param logo 
+ * @param output 
+ * @returns 
+ */
+async function readLogo(logo: string, output: string): Promise<string> {
+  const defaultLogo = `<svg width="84" height="84" viewBox="0 0 322 323" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" fill-rule="evenodd">
+    <path fill="#3662EB" d="M67 131.25l20 40.25 138.25 23L322 3.25z" />
+    <path fill-opacity=".5" fill="#3662EB" d="M98.75 196.75L162 322.5l53-106.75z" />
+    <path stroke="#3662EB" stroke-width="5" d="M57 109L4.25 3.25H271.5z" />
+  </g>`
+  try {
+    const path = join(resolve(), logo)
+    const stat = await lstat(path)
+    if (!stat.isFile()) {
+      return defaultLogo
+    } else {
+      await copyFile(path, output)
+      const name = logo.split('/').pop()
+      return `<img src="./${name}" width="84" height="84" />`
+    }
+  } catch (error) {
+    console.error('@svgtvi/plugin-preview: logo not found, default logo will be used!')
+    return defaultLogo
+  }
+}
+
+/**
+ * build preview page
+ * @param output 
+ * @param hasGroup 
+ * @param name 
+ * @param version 
+ * @param description 
+ * @param repository 
+ * @param logo 
+ * @param maps 
+ * @param imports 
+ * @param groups 
+ */
 async function buildPage(
-  output, hasGroup, name, version,
-  description, repository, maps, imports, groups
+  output,
+  hasGroup,
+  name,
+  version,
+  description,
+  repository,
+  logo,
+  maps,
+  imports,
+  groups
 ) {
   const template = hasGroup
     ? `
@@ -36,10 +102,7 @@ async function buildPage(
       </div>
     </div>`
     : `
-    <div
-      class="icons"
-      
-    >
+    <div class="icons">
       <div
         class="icon"
         v-for="(icon, index) in groups"
@@ -72,7 +135,7 @@ async function buildPage(
       <main id="app">
         <aside>
           <div class="brand">
-            Icon
+            ${logo}
             <h3>{{name}}<sup>{{version}}</sup></h3>
             <p>{{description}}</p>
           </div>
@@ -109,17 +172,21 @@ async function buildPage(
   await writeFile(join(output, 'preview.html'), html)
 }
 
-const PreviewPlugin = (params: PreviewPluginParams) => {
-  const {
-    name = 'Icon',
-    version = '1.0.0',
-    description = 'description',
-    repository = '',
-  } = params ?? {}
+const PreviewPlugin = (params?: PreviewPluginParams) => {
   return {
     name: 'preview',
     apply: 'build',
     handler: async ({ output, folders }: BuildPluginOptions) => {
+      const pkgJson = await readPkgJson()
+      const {
+        name = 'Icon',
+        version = '1.0.0',
+        description = 'description',
+        repository = '',
+        logo = ''
+      } = params ?? pkgJson
+
+      const logoElement = await readLogo(logo as string, output)
       let maps = [`"@${name}/icons": "./esm/index.js"`]
       let imports = [`import * as icons from "@${name}/icons"`]
       let groups = ['...Object.values(icons)']
@@ -146,6 +213,7 @@ const PreviewPlugin = (params: PreviewPluginParams) => {
         version,
         description,
         repository,
+        logoElement,
         maps,
         imports,
         groups
