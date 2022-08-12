@@ -1,10 +1,12 @@
 {
   "mode": "pre",
-  "tag": "v0.1.0-alpha.1",
+  "tag": "alpha",
   "initialVersions": {
-    "@svgtvi/cli": "0.1.0",
-    "@svgtvi/core": "0.1.0",
-    "@svgtvi/plugin-preview": "0.1.0"
+    "@svgtvi/cli": "0.0.0",
+    "@svgtvi/core": "0.0.0",
+    "@svgtvi/plugin-preview": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "proud-trains-juggle"
+  ]
 }
