@@ -90,11 +90,3 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     console.error('svgtvi: an error occurred! ', error)
   }
 }
-
-svgtvi({
-  input: '../../svgs',
-  clean: true,
-  prefix: 'a',
-  suffix: 'icon',
-  plugins: ['@svgtvi/plugin-preview']
-})
