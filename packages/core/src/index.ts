@@ -37,7 +37,7 @@ export default async function svgtvi(options?: SVGTVIConfig) {
 
     const { buildPlugins } = await splitPlugins(plugins)
 
-    let folders = await readFolders(join(resolve(), input))
+    let folders = await readFolders(join(resolve(), input), 2, prefix, suffix)
 
     const { hasFolder, hasFile } = folders.reduce(
       (acc, cur) => {
@@ -66,6 +66,9 @@ export default async function svgtvi(options?: SVGTVIConfig) {
           ? [
               {
                 name: 'ungrounped',
+                camelCaseName: 'Ungrounped',
+                paramCaseName: 'ungrounped',
+                pascalCaseName: 'ungrounped',
                 path: join(resolve(), input, 'ungrounped'),
                 children: []
               }
@@ -75,7 +78,7 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     }
 
     for await (const folder of folders) {
-      await generate(outputPath, folder, template, svgoConfig, prefix, suffix)
+      await generate(outputPath, folder, template, svgoConfig)
     }
 
     // mount plugins after build
@@ -87,3 +90,11 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     console.error('svgtvi: an error occurred! ', error)
   }
 }
+
+svgtvi({
+  input: '../../svgs',
+  clean: true,
+  prefix: 'a',
+  suffix: 'icon',
+  plugins: ['@svgtvi/plugin-preview']
+})

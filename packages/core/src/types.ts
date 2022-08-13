@@ -4,7 +4,8 @@ export interface SVGFile {
   name: string
   fileName: string
   path: string
-  componentName?: string
+  camelCaseName: string
+  pascalCaseName: string
   raw?: string
   tpl?: string
   children?: unknown
@@ -14,6 +15,9 @@ export interface SVGFile {
 export interface SVGFolder {
   name: string
   path: string
+  pascalCaseName: string
+  camelCaseName: string
+  paramCaseName: string
   children: SVGFile[]
 }
 
@@ -35,7 +39,7 @@ export interface BuildPluginOptions {
 
 export interface PluginBase {
   name: string
-  apply: string
+  apply?: string
   params?: Record<string, unknown>
   handler?: (options?: BuildPluginOptions) => void
 }

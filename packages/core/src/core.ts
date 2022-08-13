@@ -4,7 +4,7 @@ import { statSync } from 'node:fs'
 import { mkdirs } from 'fs-extra'
 import { transformAsync } from '@babel/core'
 import { readdir, readFile, writeFile, appendFile } from 'fs/promises'
-import { pascalCase } from 'change-case'
+import { pascalCase, camelCase, paramCase } from 'change-case'
 import { optimize, OptimizedSvg, OptimizeOptions } from 'svgo'
 import { compileTemplate, compileScript, parse } from '@vue/compiler-sfc'
 import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-commonjs'
@@ -60,7 +60,9 @@ export const defaultTemplate: TemplateParser = ({
  */
 export async function readFolders(
   path: string,
-  level = 2
+  level = 2,
+  prefix: string,
+  suffix: string
 ): Promise<Array<SVGFolder | SVGFile>> {
   if (!level) return []
   level--
@@ -72,16 +74,23 @@ export async function readFolders(
     const isDirectory = statSync(filePath).isDirectory()
     if (isDirectory && !level) continue
     if (isDirectory) {
-      const directory = await readFolders(filePath, level)
+      const directory = await readFolders(filePath, level, prefix, suffix)
       folders.push({
         name: fileName,
         path: filePath,
+        camelCaseName: camelCase(fileName),
+        paramCaseName: paramCase(fileName),
+        pascalCaseName: pascalCase(fileName),
         children: directory as SVGFile[]
       })
     } else {
+      const name = fileName.replace(/(.+).svg/, '$1')
+
       folders.push({
-        name: fileName.replace(/(.+).svg/, '$1'),
+        name,
         fileName: fileName,
+        pascalCaseName: pascalCase(`${prefix} ${name} ${suffix}`),
+        camelCaseName: camelCase(`${prefix} ${name} ${suffix}`),
         path: filePath
       })
     }
@@ -282,10 +291,10 @@ export async function generateExportFile(
   append: boolean
 ) {
   const { cjs, esm, type } = svgFiles.reduce(
-    (acc, { componentName }: SVGFile) => {
-      acc.cjs += `module.exports.${componentName} = require('./${componentName}.js')\n`
-      acc.esm += `export { default as ${componentName} } from './${componentName}.js'\n`
-      acc.type += `export { default as ${componentName} } from './${componentName}'\n`
+    (acc, { pascalCaseName }: SVGFile) => {
+      acc.cjs += `module.exports.${pascalCaseName} = require('./${pascalCaseName}.js')\n`
+      acc.esm += `export { default as ${pascalCaseName} } from './${pascalCaseName}.js'\n`
+      acc.type += `export { default as ${pascalCaseName} } from './${pascalCaseName}'\n`
       return acc
     },
     { cjs: '', esm: '', type: '' }
@@ -316,22 +325,19 @@ export async function generate(
   path: string,
   folder: SVGFile | SVGFolder,
   template?: TemplateParser,
-  svgoConfig?: OptimizeOptions,
-  prefix?: string,
-  suffix?: string
+  svgoConfig?: OptimizeOptions
 ) {
   const files = (folder.children || [folder]) as SVGFile[]
-  const group = folder.children ? folder.name : ''
+  const group = folder.children ? folder.camelCaseName : ''
   const outputPath = join(path, group)
   for await (const file of files) {
     await mkdirs(join(outputPath, 'esm'))
     const tpl = await generateTemplate(file, group, template, svgoConfig)
-    const componentName = prefix + pascalCase(file.name) + suffix
     const esmCode = compiler({ ...file, tpl })
     const cjsCode = await transformToCjs(esmCode)
-    await generateFile(outputPath, cjsCode, componentName)
-    await generateFile(join(outputPath, 'esm'), esmCode, componentName)
-    Object.assign(file, { componentName, output: outputPath })
+    await generateFile(outputPath, cjsCode, file.pascalCaseName)
+    await generateFile(join(outputPath, 'esm'), esmCode, file.pascalCaseName)
+    Object.assign(file, { output: outputPath })
   }
   await generateExportFile(outputPath, files, !folder.children)
 }
