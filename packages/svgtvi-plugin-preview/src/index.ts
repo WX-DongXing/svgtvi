@@ -237,18 +237,18 @@ const PreviewPlugin = (params?: PreviewPluginParams) => {
 
       const logoElement = await readLogo(logo as string, output)
       let maps = [`"@${name}/icons": "./esm/index.js"`]
-      let imports = [`import * as icons from "@${name}/icons"`]
-      let groups = ['...Object.entries(icons)']
+      let imports = [`import * as Icons from "@${name}/icons"`]
+      let groups = ['...Object.entries(Icons)']
 
       const hasGroup = folders.some(folder => !!folder.children)
       if (hasGroup) {
         const content = folders.reduce<IconImports>((acc, cur) => {
           const { maps, imports, groups } = acc
           if (cur.children) {
-            const { camelCaseName } = cur
+            const { camelCaseName, pascalCaseName } = cur
             maps.push(`"@${name}/${camelCaseName}": "./${camelCaseName}/esm/index.js"`)
-            imports.push(`import * as ${camelCaseName} from "@${name}/${camelCaseName}"`)
-            groups.push(`{ name: "${camelCaseName}", icons: Object.entries(${camelCaseName}) }`)
+            imports.push(`import * as ${pascalCaseName} from "@${name}/${camelCaseName}"`)
+            groups.push(`{ name: "${camelCaseName}", icons: Object.entries(${pascalCaseName}) }`)
           }
           return acc
         }, { maps: [], imports: [], groups: [] })
