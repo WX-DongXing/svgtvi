@@ -33,7 +33,24 @@ export const createSVGTVIFragment = (
       return (acc += element.outerHTML)
     }, '')
 
-  return Object.assign(fragment, { serialize })
+  const find = (selector: string, attr?: string, value?: string) => {
+    const elements = fragment.querySelectorAll(selector)
+    return {
+      set(prop: string, propValue: string) {
+        for (const element of elements) {
+          if (attr && value && element.getAttribute(attr)) {
+            element.setAttribute(`:${prop}`, propValue)
+          } else {
+            element.setAttribute(`:${prop}`, propValue)
+          }
+        }
+      }
+    }
+  }
+
+  const f = Object.assign(fragment, { serialize, find })
+
+  return f
 }
 
 /**

@@ -23,6 +23,9 @@ export interface SVGFolder {
 
 export interface SVGTVIFragement extends DocumentFragment {
   serialize: () => string
+  find: (selector: string, attr?: string, value?: string) => {
+    set: (prop: string, propValue: string) => void
+  }
 }
 
 export interface TemplateParserOptions {
