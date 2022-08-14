@@ -8,7 +8,7 @@ export interface SVGFile {
   pascalCaseName: string
   raw?: string
   tpl?: string
-  children?: unknown
+  children?: any[]
   output?: string
 }
 

@@ -42,7 +42,7 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     const { hasFolder, hasFile } = folders.reduce(
       (acc, cur) => {
         if (!acc.hasFolder) {
-          acc.hasFolder = !!cur.children
+          acc.hasFolder = (cur?.children ?? []).length > 0
         }
         if (!acc.hasFile) {
           acc.hasFile = !cur.children
@@ -66,9 +66,9 @@ export default async function svgtvi(options?: SVGTVIConfig) {
           ? [
               {
                 name: 'ungrounped',
-                camelCaseName: 'Ungrounped',
+                camelCaseName: 'ungrounped',
                 paramCaseName: 'ungrounped',
-                pascalCaseName: 'ungrounped',
+                pascalCaseName: 'Ungrounped',
                 path: join(resolve(), input, 'ungrounped'),
                 children: []
               }

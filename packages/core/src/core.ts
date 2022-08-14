@@ -328,6 +328,7 @@ export async function generate(
   svgoConfig?: OptimizeOptions
 ) {
   const files = (folder.children || [folder]) as SVGFile[]
+  if (!files.length) return
   const group = folder.children ? folder.camelCaseName : ''
   const outputPath = join(path, group)
   for await (const file of files) {
