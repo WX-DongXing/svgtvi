@@ -21,7 +21,7 @@ export interface SVGFolder {
   children: SVGFile[]
 }
 
-export interface SVGTVIFragement extends DocumentFragment {
+export interface SVGTVIFragment extends DocumentFragment {
   serialize: () => string
   find: (selector: string, attr?: string, value?: string) => {
     set: (prop: string, propValue: string) => void
@@ -29,7 +29,7 @@ export interface SVGTVIFragement extends DocumentFragment {
 }
 
 export interface TemplateParserOptions {
-  fragment: SVGTVIFragement
+  fragment: SVGTVIFragment
   group: string
 }
 

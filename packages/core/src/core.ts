@@ -11,7 +11,7 @@ import TransformModulesCommonJSPlugin from '@babel/plugin-transform-modules-comm
 import {
   TemplateParser,
   SVGFile,
-  SVGTVIFragement,
+  SVGTVIFragment,
   SVGFolder,
   Plugin,
   PluginBase,
@@ -27,7 +27,7 @@ import {
  */
 export const createSVGTVIFragment = (
   fragment: DocumentFragment
-): SVGTVIFragement => {
+): SVGTVIFragment => {
   const serialize = () =>
     Array.from(fragment.children).reduce((acc: string, element: Element) => {
       return (acc += element.outerHTML)
