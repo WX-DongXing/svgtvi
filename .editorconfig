@@ -2,7 +2,7 @@
 end_of_line = lf
 insert_final_newline = true
 
-[*.{js,ts}]
+[*.{js,ts,md}]
 charset = utf-8
 indent_style = space
 indent_size = 2
