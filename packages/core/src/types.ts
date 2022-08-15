@@ -60,7 +60,6 @@ export interface ImportPlugin {
 export interface SVGTVIConfig {
   input: string
   output?: string
-  clean?: boolean
   template?: TemplateParser
   prefix?: string
   suffix?: string

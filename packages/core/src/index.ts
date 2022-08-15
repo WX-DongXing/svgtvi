@@ -10,7 +10,6 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     const {
       input,
       output = 'dist',
-      clean = false,
       prefix = '',
       suffix = '',
       plugins = [],
@@ -30,10 +29,9 @@ export default async function svgtvi(options?: SVGTVIConfig) {
       return
     }
 
-    if (clean) {
-      await remove(outputPath)
-      await mkdirs(outputPath)
-    }
+    await remove(outputPath)
+
+    await mkdirs(outputPath)
 
     const { buildPlugins } = await splitPlugins(plugins)
 

@@ -35,8 +35,7 @@ if (!pathExistsSync(argv.input)) {
 
 svgtvi({
   input: argv.input,
-  output: argv.output ?? 'dist',
-  clean: true,
+  output: argv.output,
   prefix: argv.prefix,
   suffix: argv.suffix
 })
