@@ -53,6 +53,17 @@ export default async function svgtvi(options?: SVGTVIConfig) {
     )
 
     if (hasFolder) {
+      const ungrouped = [
+        {
+          name: 'ungrounded',
+          camelCaseName: 'ungrouped',
+          paramCaseName: 'ungrouped',
+          pascalCaseName: 'Ungrouped',
+          path: join(resolve(), input, 'ungrouped'),
+          children: []
+        }
+      ]
+
       folders = folders.reduce(
         (acc: SVGFolder[], folder: SVGFile | SVGFolder) => {
           if (folder.children) {
@@ -62,18 +73,8 @@ export default async function svgtvi(options?: SVGTVIConfig) {
           }
           return acc
         },
-        hasFile
-          ? [
-              {
-                name: 'ungrounped',
-                camelCaseName: 'ungrounped',
-                paramCaseName: 'ungrounped',
-                pascalCaseName: 'Ungrounped',
-                path: join(resolve(), input, 'ungrounped'),
-                children: []
-              }
-            ]
-          : []
+
+        hasFile ? ungrouped : []
       )
     }
 
