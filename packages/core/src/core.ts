@@ -34,14 +34,32 @@ export const createSVGTVIFragment = (
     }, '')
 
   const find = (selector: string, attr?: string, value?: string) => {
-    const elements = fragment.querySelectorAll(selector)
+    const elements: Element[] = []
+    const allElements = fragment.querySelectorAll(selector)
+
+    for (const element of allElements) {
+      if (attr && !value) {
+        if (element.hasAttribute(attr)) {
+          elements.push(element)
+        }
+      } else if (!attr && !value) {
+        elements.push(element)
+      } else if (attr && value) {
+        if (element.getAttribute(attr) === value) {
+          elements.push(element)
+        }
+      }
+    }
+
     return {
-      set(prop: string, propValue: string) {
+      elements,
+      set: (prop: string, propValue: string, isVueProp?: boolean) => {
         for (const element of elements) {
-          if (attr && value && element.getAttribute(attr)) {
+          if (isVueProp) {
+            element.removeAttribute(prop)
             element.setAttribute(`:${prop}`, propValue)
           } else {
-            element.setAttribute(`:${prop}`, propValue)
+            element.setAttribute(prop, propValue)
           }
         }
       }
