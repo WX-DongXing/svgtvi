@@ -17,6 +17,9 @@
 - 🏗️ 支持编译模板，个性化构建图标组件
 - 🔌 支持自定义插件，内置预览插件，生成预览页面
 
+## 例子
+[svgtvi-example-icons](https://github.com/WX-DongXing/svgtvi-example-icons): 使用 svgtvi 构建的图标库
+
 ## 使用
 ### 命令行
 ```

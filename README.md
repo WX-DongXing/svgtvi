@@ -18,6 +18,9 @@
 - 🏗️ Supports compiling templates and personalized icon components
 - 🔌 Support custom plugins, built-in preview plugin, and generate preview page
 
+## Example
+[svgtvi-example-icons](https://github.com/WX-DongXing/svgtvi-example-icons): the example icons created by svgtvi
+
 ## Use
 ### Command Line
 ```
