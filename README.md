@@ -88,7 +88,7 @@ output folder path
 
 ### prefix
 > Types: `String`
-> Default Value: 
+> Default Value: ''
 
 Output icon prefix, which will be converted to [pascalCase](https://github.com/blakeembrey/change-case) format together with file name and suffix
 
@@ -145,17 +145,16 @@ await svgtvi({
   template: ({ fragment, group }) => {
 
     fragment
-        .find('path', 'fill', '#eee')
-        .set('fill', 'theme')
+      .find('path', 'fill', '#eee')
+      .set('fill', 'primary', true)
 
     return `<script setup>
-    import { computed } from 'vue'
-
-    const props = defineProps({
-        theme: 'light'
+    defineProps({
+      primary: {
+        type: String,
+        default: '#3662EB'
+      }
     })
-
-    const color = computed(() => props.theme === 'light' ? 'black' : 'white')
 
     </script>
     <template>
@@ -171,17 +170,18 @@ will get the following
 <script setup>
 import { computed } from 'vue'
 
-const props = defineProps({
-  theme: 'light'
+defineProps({
+  primary: {
+    type: String,
+    default: '#3662EB'
+  }
 })
-
-const color = computed(() => props.theme === 'light' ? 'black' : 'white')
 
 </script>
 <template>
   <svg ...>
-      <path fill="grey" ...>
-      <path :fill="theme" ...>
+    <path fill="grey" ... />
+    <path :fill="primary" ... />
   </svg>
 </template>
 ```

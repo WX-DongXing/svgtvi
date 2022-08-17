@@ -81,7 +81,7 @@ SVG 资源文件夹
 
 ### output
 > 类型：`String`
-> 默认值：dist
+> 默认值：'dist'
 
 输出文件夹
 
@@ -143,17 +143,16 @@ await svgtvi({
   template: ({ fragment, group }) => {
 
     fragment
-        .find('path', 'fill', '#eee')
-        .set('fill', 'theme')
+      .find('path', 'fill', '#eee')
+      .set('fill', 'primary', true)
 
     return `<script setup>
-    import { computed } from 'vue'
-
-    const props = defineProps({
-        theme: 'light'
+    defineProps({
+      primary: {
+        type: String,
+        default: '#3662EB'
+      }
     })
-
-    const color = computed(() => props.theme === 'light' ? 'black' : 'white')
 
     </script>
     <template>
@@ -169,17 +168,18 @@ await svgtvi({
 <script setup>
 import { computed } from 'vue'
 
-const props = defineProps({
-  theme: 'light'
+defineProps({
+  primary: {
+    type: String,
+    default: '#3662EB'
+  }
 })
-
-const color = computed(() => props.theme === 'light' ? 'black' : 'white')
 
 </script>
 <template>
   <svg ...>
-      <path fill="grey" ...>
-      <path :fill="theme" ...>
+    <path fill="grey" ... />
+    <path :fill="primary" ... />
   </svg>
 </template>
 ```
