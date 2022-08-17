@@ -166,7 +166,6 @@ await svgtvi({
 将得到以下内容
 ```
 <script setup>
-import { computed } from 'vue'
 
 defineProps({
   primary: {

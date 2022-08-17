@@ -168,7 +168,6 @@ await svgtvi({
 will get the following
 ```
 <script setup>
-import { computed } from 'vue'
 
 defineProps({
   primary: {
